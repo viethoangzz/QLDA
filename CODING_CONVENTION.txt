@@ -1,0 +1,251 @@
+CODING CONVENTION - DỰ ÁN QUẢN LÝ ĐIỆN MÁY
+Phiên bản: 1.0
+Ngày lập: 16/11/2026
+
+1. MỤC ĐÍCH VÀ PHẠM VI
+Quy định cách tổ chức, đặt tên, định dạng và viết mã thống nhất cho các
+chức năng sản phẩm/serial, mua hàng/kho và bán hàng/đơn hàng.
+Tài liệu được xây dựng từ mã nguồn hiện tại trong BE và FE.
+Các mục ghi "Khuyến nghị" là hướng áp dụng cho code mới hoặc khi chỉnh sửa,
+không có nghĩa toàn bộ code hiện tại đã tuân thủ.
+
+Công nghệ của dự án:
+- Backend: Java 17, Spring Boot, Spring Data JPA, Maven và Flyway.
+- Frontend: JavaScript, React, React Router, Ant Design và Vite.
+- Dữ liệu: MySQL; kiểm thử backend có cấu hình H2.
+- Kiểm thử: JUnit/MockMvc cho backend, Playwright cho giao diện.
+
+2. TỔ CHỨC MÃ NGUỒN
+Backend đặt trong BE/src/main/java/com/javaweb:
+- controller: nhận HTTP request, kiểm tra quyền và gọi service.
+  Ví dụ: AuthAPI, MdlController.
+- service: khai báo hợp đồng nghiệp vụ, ví dụ MdlService.
+- service/impl: triển khai nghiệp vụ, ví dụ MdlServiceImpl.
+- repository: truy cập dữ liệu qua EntityManager, ví dụ MdlRepository.
+- repository/entity: ánh xạ bảng dữ liệu, ví dụ ProductEntity.
+- model: dữ liệu và tiện ích kiểm tra đầu vào, hiện có Input.
+- config: bộ lọc phiên và khởi tạo dữ liệu, ví dụ SessionFilter, DemoSeed.
+- controlleradvice: xử lý ngoại lệ tập trung trong ApiErrors.
+- Application.java: điểm khởi động ứng dụng.
+
+Tài nguyên và kiểm thử backend:
+- BE/src/main/resources/application.properties: cấu hình ứng dụng.
+- BE/src/main/resources/db/migration: các migration SQL.
+- BE/src/test/java/com/javaweb: kiểm thử chức năng và tích hợp.
+
+Frontend đặt trong FE/src:
+- pages: màn hình nghiệp vụ, hiện có Login, catalog và orders.
+- components/Common: thành phần dùng chung như Listing, Heading, Status.
+- layouts/AppLayout: bố cục, menu và thông tin phiên đăng nhập.
+- routes: khai báo điều hướng trong AppRoutes.
+- context: Auth context chia sẻ user và setUser.
+- services/api.js: gọi API, tạo query, định dạng tiền và thời gian.
+- App.jsx: khôi phục phiên và cấu hình các route cấp ứng dụng.
+- index.jsx: điểm gắn React vào DOM; index.css: giao diện dùng chung.
+- FE/test: kiểm thử giao diện bằng Playwright.
+
+Giữ trách nhiệm của từng tầng. Luồng nghiệp vụ chính là
+Controller -> Service -> Repository -> Database.
+AuthAPI và DemoSeed hiện truy cập repository trực tiếp cho tác vụ riêng.
+Không đưa logic tính tồn, xác nhận đơn hoặc tính tiền vào component React.
+
+3. QUY TẮC ĐẶT TÊN
+- Tên định danh dùng tiếng Anh, không dấu và phản ánh đúng ý nghĩa.
+- Java class/interface và React component: PascalCase.
+  Ví dụ: ProductEntity, MdlService, SalesLine, AppLayout.
+- Biến, tham số, phương thức và hàm JavaScript: camelCase.
+  Ví dụ: productId, warehouseId, checkBalance, loadRefs, setDetail.
+- Hằng số và mã trạng thái: UPPER_SNAKE_CASE.
+  Ví dụ: TYPES, PASSWORD, IN_STOCK, PARTIALLY_RECEIVED.
+- Package Java: chữ thường, ví dụ com.javaweb.repository.entity.
+- File Java trùng tên lớp public; entity có hậu tố Entity.
+- Component theo thư mục sử dụng index.jsx như cấu trúc đang có.
+  File tiện ích không có JSX sử dụng .js.
+- Tên bảng và cột SQL: snake_case, ví dụ product_serial, unit_price.
+- Class CSS: kebab-case, ví dụ app-layout, page-heading, line-card.
+- Endpoint nhiều từ: kebab-case, ví dụ purchase-orders, sales-orders.
+- Biến boolean thể hiện trạng thái, ví dụ isActive, busy, loading, admin.
+- Khuyến nghị: dùng tên rõ nghĩa cho code mới. Tên ngắn như r, p, i chỉ
+  nên dùng trong vòng lặp hoặc callback ngắn, có ngữ cảnh rõ ràng.
+
+4. ĐỊNH DẠNG VÀ IMPORT
+- Lưu file bằng UTF-8 để giữ nguyên tiếng Việt.
+- Phần lớn code Java, JavaScript, JSX và CSS đang thụt lề 2 dấu cách.
+  DemoSeed hiện dùng 4 dấu cách; khi sửa nhỏ, giữ định dạng của file đó.
+- Không dùng tab trộn với dấu cách; giữ kiểu xuống dòng của file đang sửa.
+- Dấu mở khối đặt cùng dòng với khai báo khi câu lệnh ngắn.
+- Java và JavaScript sử dụng dấu chấm phẩy kết thúc câu lệnh.
+- JavaScript/JSX dùng dấu nháy kép cho chuỗi thông thường; dùng backtick
+  khi cần nội suy, ví dụ `/products/${id}`.
+- Danh sách tham số, thuộc tính JSX hoặc biểu thức dài được ngắt dòng.
+- Object/array JavaScript nhiều dòng có thể giữ dấu phẩy cuối như code hiện tại.
+- Tách các hàm và nhóm xử lý bằng dòng trống; không để khoảng trắng cuối dòng.
+- Đặt package trước import trong Java; đặt import ở đầu file JavaScript.
+- Code Java hiện có wildcard import. Khuyến nghị code mới dùng import cụ thể,
+  loại bỏ import không sử dụng và giữ cách nhóm import nhất quán trong file.
+- Khuyến nghị code mới dùng dấu ngoặc nhọn cho if/else và vòng lặp,
+  kể cả khi thân chỉ có một câu lệnh, để tránh lỗi khi bổ sung xử lý.
+- Hiện chưa có cấu hình ESLint/Prettier trong phần mã nguồn được rà soát;
+  không xem quy tắc định dạng này là đã được công cụ tự động kiểm tra.
+
+5. QUY TẮC VIẾT HÀM VÀ COMMENT
+- Hàm có nhiệm vụ rõ ràng; tách phần kiểm tra, chuẩn hóa hoặc xử lý lặp lại
+  thành hàm dùng chung như serialInput, checkBalance, query và money.
+- Dùng private cho hàm nội bộ; chỉ public các hàm cần được bên ngoài gọi.
+- Ưu tiên constructor injection với dependency không đổi của controller/service.
+- Dùng @Override khi triển khai interface hoặc ghi đè phương thức.
+- Tránh sao chép logic validation, gọi API và định dạng dữ liệu giữa các màn hình.
+- Comment hàm, constructor, khai báo hàm và callback phải có đủ 3 dòng:
+  // Ngày thực hiện: dd/MM/yyyy.
+  // Người thực hiện: Họ tên người phụ trách.
+  // Chức năng của hàm: Mô tả hành vi và mục đích của hàm.
+- Người thực hiện được đối chiếu với file phân công theo chức năng.
+  Hàm dùng chung nhiều module có thể ghi nhiều người, nối bằng dấu +.
+- Bộ comment hiện tại dùng ngày quy ước trước deadline tương ứng 1 ngày,
+  có ghi "(theo kế hoạch)"; không coi đây là ngày triển khai đã được xác nhận.
+  Khi cập nhật ngày thực tế, ghi đúng thông tin đã xác nhận, không tự lùi ngày
+  để tạo cảm giác công việc đã hoàn thành trước hạn.
+- Đặt comment gần hàm. Callback có thể dùng comment trong thân hàm hoặc
+  block comment 3 dòng ở vị trí hợp lệ, không làm thay đổi cú pháp JavaScript.
+- Nội dung comment và thông báo giao diện dùng tiếng Việt có dấu.
+- Khi đổi hành vi của hàm, cập nhật mô tả; không để comment mâu thuẫn với code.
+
+Ví dụ theo AuthAPI.java:
+  // Ngày thực hiện: 06/10/2026 (theo kế hoạch).
+  // Người thực hiện: Tạ Minh Quang.
+  // Chức năng của hàm: Trả về thông tin người dùng của phiên hiện tại.
+  public Object me(@RequestAttribute("user") UserEntity u) {
+    return publicUser(u);
+  }
+
+6. BACKEND VÀ API
+- API dùng tiền tố /api/v1; xác thực nằm dưới /api/v1/auth.
+- GET đọc dữ liệu; POST tạo dữ liệu hoặc thực hiện hành động nghiệp vụ;
+  PATCH cập nhật; DELETE /products/{id} hiện dùng để ngừng bán sản phẩm.
+- Giữ hợp đồng endpoint hiện tại khi bổ sung hoặc sửa chức năng.
+- Phản hồi thành công thông thường: {"data": ...}.
+- Phản hồi danh sách có phân trang:
+  {"data": [...], "meta": {"total": 0, "page": 1, "pageSize": 20}}.
+- Phản hồi lỗi: {"error": {"code": "BAD_REQUEST", "message": "..."}}.
+- Mã lỗi hiện dùng: 400 dữ liệu sai, 401 chưa xác thực, 403 thiếu quyền,
+  404 không tìm thấy, 409 xung đột, 500 lỗi hệ thống.
+- Các endpoint POST hiện có nhiều trường hợp trả 201, gồm cả đăng nhập,
+  đăng xuất và chuyển trạng thái. Không tự đổi mã trả về khi chỉ sửa định dạng.
+- Kiểm tra dữ liệu bằng Input: thuộc tính cho phép, trường bắt buộc, độ dài,
+  số lượng, giá, loại mã và danh sách trùng.
+- Tìm kiếm dùng q; phân trang dùng page và pageSize, mặc định là 1 và 20;
+  pageSize tối đa 100. Giữ thống nhất tên bộ lọc giữa FE và BE.
+- Dùng ResponseStatusException hoặc hàm bad/conflict cho lỗi có chủ đích;
+  ApiErrors chịu trách nhiệm chuyển ngoại lệ thành phản hồi thống nhất.
+- Không trả stack trace, passwordHash hay thông tin nội bộ trong phản hồi lỗi.
+
+7. DỮ LIỆU VÀ QUY TẮC NGHIỆP VỤ
+- Entity kế thừa BaseEntity để dùng ID, createdAt và updatedAt.
+- ID hiện dùng chuỗi UUID; tên thuộc tính Java camelCase được ánh xạ sang
+  cột SQL snake_case bằng annotation JPA.
+- Entity hiện dùng public field và lưu khóa liên kết dưới dạng ID.
+  Giữ tương thích với mô hình này khi sửa nhỏ; không tự đổi sang mô hình khác.
+- Backend dùng BigDecimal cho tiền; SQL dùng decimal(24,2).
+  Không dùng float/double để tính tiền nghiệp vụ trong code mới.
+- Thời điểm nghiệp vụ dùng Instant; frontend hiển thị múi giờ Việt Nam
+  qua hàm date, tiền tệ VND qua hàm money.
+- Chuẩn hóa mã bằng trim và toUpperCase(Locale.ROOT); IMEI gồm 15 chữ số.
+- SERIALIZED quản lý theo serial; BULK quản lý theo số lượng.
+- Serial đi theo trạng thái REGISTERED -> IN_STOCK -> SOLD.
+- Đăng ký serial chưa làm tăng tồn; nhận hàng mới tăng tồn và ghi RECEIPT.
+- Tạo đơn bán nháp chưa trừ tồn; xác nhận đơn mới trừ tồn, ghi SALE
+  và chuyển serial thành SOLD.
+- Lưu giá bán tại thời điểm tạo đơn bằng unitPriceSnapshot; không tính lại
+  giá của đơn cũ theo giá sản phẩm đã thay đổi.
+- Xử lý nhập/bán trong transaction; kiểm tra tồn và trạng thái tại backend.
+- Dùng khóa dữ liệu khi cần chống nhập/bán đồng thời; giữ thứ tự khóa sản phẩm
+  ổn định để giảm nguy cơ các giao dịch chờ khóa lẫn nhau.
+- Giữ các ràng buộc unique, foreign key và check của CSDL.
+- Migration theo mẫu V<version>__<description>.sql, ví dụ V1__mdl_schema.sql.
+  Khuyến nghị tạo migration mới khi thay đổi schema đã được áp dụng,
+  không sửa lịch sử migration trên cơ sở dữ liệu đang sử dụng.
+
+8. FRONTEND REACT
+- Sử dụng function component và hooks như useState, useEffect, useContext.
+- Gọi hooks ở cấp cao nhất của component, không đặt trong nhánh điều kiện
+  hoặc vòng lặp. Khai báo dependency phù hợp cho useEffect.
+- Không sửa trực tiếp state; dùng setter. Khi phụ thuộc giá trị trước đó,
+  dùng dạng setRefresh((v) => v + 1).
+- Dùng Auth context cho trạng thái người dùng; React Router cho điều hướng.
+- Tái sử dụng Ant Design và các component Common thay vì tạo bản sao.
+- Dùng Form rules để kiểm tra biểu mẫu; backend vẫn phải kiểm tra lại dữ liệu.
+- Dùng key ổn định từ ID bản ghi hoặc key của Form.List khi render danh sách.
+- Thực hiện gọi HTTP qua request, api hoặc all trong services/api.js:
+  request lấy toàn bộ phản hồi; api lấy data; all gom các trang dữ liệu.
+- Dùng query để tạo tham số URL, tránh tự nối giá trị chưa mã hóa.
+- Với tác vụ bất đồng bộ, hiển thị busy/loading, xử lý lỗi và kết thúc loading
+  trong finally hoặc nhánh hoàn tất tương ứng.
+- Cleanup effect khi cần để tránh cập nhật state từ yêu cầu cũ hoặc giữ lại
+  event listener sau khi component đã bị hủy.
+- Dùng === và !==; dùng ?. khi dữ liệu có thể chưa có, ?? khi chỉ cần giá trị
+  thay thế cho null/undefined. Không thay ?? bằng || nếu số 0 là dữ liệu hợp lệ.
+- Ưu tiên class CSS dùng chung; giữ inline style cho thuộc tính cục bộ như
+  chiều rộng ô chọn theo cách viết đang có.
+
+9. XÁC THỰC, PHÂN QUYỀN VÀ CẤU HÌNH
+- Ứng dụng hiện dùng HTTP session và cookie JSESSIONID, không dùng JWT.
+- Frontend gửi credentials: "include" khi gọi API.
+- SessionFilter kiểm tra phiên và gắn user vào request cho API cần xác thực.
+- Dùng ADMIN và EMPLOYEE theo giá trị trong code; kiểm tra quyền tại backend.
+  Việc ẩn nút trên frontend chỉ hỗ trợ giao diện, không thay thế kiểm tra quyền.
+- Mật khẩu lưu dưới dạng BCrypt; phản hồi người dùng chỉ chứa trường cần thiết.
+- Cấu hình mật khẩu qua DB_PASSWORD, SEED_ADMIN_PASSWORD và
+  SEED_STAFF_PASSWORD. Hai mật khẩu seed phải có ít nhất 12 ký tự;
+  dự án không cung cấp mật khẩu mặc định trong mã nguồn.
+- Không ghi mật khẩu, cookie phiên hoặc thông tin xác thực vào log.
+- Dùng truy vấn bind parameter như MdlRepository.find; tên trường động
+  phải lấy từ giá trị nội bộ được kiểm soát.
+
+10. KIỂM THỬ VÀ KIỂM TRA TRƯỚC KHI BÀN GIAO
+- Backend: viết kiểm thử trong BE/src/test/java; tên test phản ánh hành vi,
+  ví dụ validationAndNormalization, concurrentSales, receiptsRollback.
+- Kiểm tra cả luồng hợp lệ và lỗi: thiếu quyền, serial trùng, IMEI sai,
+  thiếu tồn, nhập vượt đơn mua, rollback và thao tác đồng thời.
+- Dữ liệu kiểm thử phải độc lập; không chạy kiểm thử ghi dữ liệu trên CSDL thật.
+- Frontend: kiểm tra luồng nhập hàng -> tồn kho -> bán hàng -> cập nhật serial,
+  cùng trạng thái hiển thị cho Admin/Nhân viên.
+- Lệnh backend khi đã có Java 17 và Maven: chạy "mvn test" trong thư mục BE.
+- Lệnh build frontend khi đã cài dependency: chạy "npm run build" trong FE.
+- Script kiểm thử giao diện: "npm run test:e2e" trong FE. Cần chuẩn bị CSDL,
+  trình duyệt và môi trường theo playwright.config.js trước khi chạy.
+  Cấu hình hiện tham chiếu scripts/start-be.cjs và node_modules ở thư mục gốc;
+  phải kiểm tra các đường dẫn này vì bản workspace hiện tại chưa có script đó.
+- Với thay đổi chỉ ở tài liệu/comment, kiểm tra nội dung và cú pháp phù hợp;
+  không tự mở rộng phạm vi thành thay đổi nghiệp vụ.
+
+Danh sách rà soát:
+[ ] Đúng tầng, đúng module và đúng cách đặt tên.
+[ ] Định dạng nhất quán; tiếng Việt không lỗi mã hóa.
+[ ] Hàm có đủ 3 dòng comment, người phụ trách và loại ngày ghi rõ ràng.
+[ ] Input được kiểm tra, lỗi trả đúng cấu trúc, quyền được kiểm tra ở backend.
+[ ] Không làm sai trạng thái serial, số lượng tồn hoặc giá đã chốt trên đơn.
+[ ] Giao diện có loading, thông báo lỗi và cập nhật sau thao tác thành công.
+[ ] Không đưa bí mật hay dữ liệu kiểm thử vào mã nguồn.
+[ ] Đã chạy kiểm tra phù hợp và ghi rõ kiểm tra chưa chạy hoặc bị lỗi.
+
+11. CÁC FILE THAM CHIẾU CHÍNH
+- BE/pom.xml
+- BE/src/main/java/com/javaweb/controller/AuthAPI.java
+- BE/src/main/java/com/javaweb/controller/MdlController.java
+- BE/src/main/java/com/javaweb/service/impl/MdlServiceImpl.java
+- BE/src/main/java/com/javaweb/repository/MdlRepository.java
+- BE/src/main/java/com/javaweb/repository/entity/BaseEntity.java
+- BE/src/main/java/com/javaweb/model/Input.java
+- BE/src/main/java/com/javaweb/controlleradvice/ApiErrors.java
+- BE/src/main/java/com/javaweb/config/SessionFilter.java
+- BE/src/main/resources/db/migration/V1__mdl_schema.sql
+- BE/src/test/java/com/javaweb/ModulesTest.java
+- FE/package.json
+- FE/src/services/api.js
+- FE/src/components/Common/index.jsx
+- FE/src/pages/catalog/index.jsx
+- FE/src/pages/orders/index.jsx
+- FE/src/routes/index.jsx
+- FE/src/index.css
+- FE/test/modules.spec.js
+- FE/playwright.config.js
